@@ -13,6 +13,7 @@ const Index = () => {
         id: Date.now(),
         text: input,
         isCompleted: false,
+        images: [],
       };
       setTasks([...tasks, newTask]);
       setInput("");
@@ -21,6 +22,16 @@ const Index = () => {
 
   const handleDeleteTask = (id) => {
     setTasks(tasks.filter((task) => task.id !== id));
+  };
+
+  const handleImageUpload = (event, taskId) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const imageUrl = reader.result;
+      setTasks(tasks.map((task) => (task.id === taskId ? { ...task, images: [...task.images, imageUrl] } : task)));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleToggleComplete = (id) => {
@@ -43,6 +54,14 @@ const Index = () => {
               <Text as={task.isCompleted ? "del" : undefined}>{task.text}</Text>
             </Checkbox>
             <IconButton icon={<FaTrash />} onClick={() => handleDeleteTask(task.id)} colorScheme="red" aria-label="Delete task" />
+            <Input type="file" onChange={(e) => handleImageUpload(e, task.id)} placeholder="Upload Image" size="sm" />
+            <Flex wrap="wrap">
+              {task.images.map((image, index) => (
+                <Box key={index} p={1} borderWidth="1px" borderRadius="lg">
+                  <Image src={image} boxSize="100px" objectFit="cover" />
+                </Box>
+              ))}
+            </Flex>
           </ListItem>
         ))}
       </List>
